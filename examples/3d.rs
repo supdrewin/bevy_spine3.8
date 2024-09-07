@@ -74,7 +74,7 @@ fn setup(
     // spine
     let skeleton = SkeletonData::new_from_json(
         asset_server.load("spineboy/export/spineboy-pro.json"),
-        asset_server.load("spineboy/export/spineboy-pma.atlas"),
+        asset_server.load("spineboy/export/spineboy.atlas"),
     );
     let skeleton_handle = skeletons.add(skeleton);
     commands.spawn(SpineBundle {

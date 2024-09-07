@@ -1,7 +1,6 @@
 use std::{fmt::Debug, hash::Hash, marker::PhantomData};
 
 use bevy::prelude::*;
-use rusty_spine::Physics;
 
 use crate::{Spine, SpineBone, SpineSystem};
 
@@ -177,7 +176,7 @@ pub fn spine_sync_bones<S: SpineSynchronizer>(
         }
     }
     for mut spine in spine_query.iter_mut() {
-        spine.0.skeleton.update_world_transform(Physics::Update);
+        spine.0.skeleton.update_world_transform();
     }
 }
 

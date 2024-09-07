@@ -27,7 +27,7 @@ use materials::{
 use rusty_spine::{
     atlas::{AtlasFilter, AtlasWrap},
     controller::{SkeletonCombinedRenderable, SkeletonRenderable},
-    AnimationEvent, Physics, Skeleton,
+    AnimationEvent, Skeleton,
 };
 use textures::SpineTextureConfig;
 
@@ -536,7 +536,7 @@ fn spine_load(
                 atlas_handle,
                 kind,
                 status,
-                premultiplied_alpha,
+                premultiplied_alpha: _,
             } = skeleton_data_asset;
             if matches!(status, SkeletonDataStatus::Loading) {
                 let atlas = if let Some(atlas) = atlases.get(atlas_handle) {
@@ -544,9 +544,10 @@ fn spine_load(
                 } else {
                     continue;
                 };
-                if let Some(page) = atlas.atlas.pages().next() {
+                // TODO
+                /*if let Some(page) = atlas.atlas.pages().next() {
                     *premultiplied_alpha = page.pma();
-                }
+                }*/
                 match kind {
                     SkeletonDataKind::JsonFile(json_handle) => {
                         let json = if let Some(json) = jsons.get(json_handle) {
@@ -833,7 +834,7 @@ fn spine_update_animation(
     spine_event_queue: Res<SpineEventQueue>,
 ) {
     for (_, mut spine) in spine_query.iter_mut() {
-        spine.update(time.delta_seconds(), Physics::Update);
+        spine.update(time.delta_seconds());
     }
     {
         let mut events = spine_event_queue.0.lock().unwrap();

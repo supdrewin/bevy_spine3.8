@@ -68,7 +68,8 @@ impl SpineTextures {
                 path: path.to_owned(),
                 atlas_address: page.atlas().c_ptr() as usize,
                 config: SpineTextureConfig {
-                    premultiplied_alpha: page.pma(),
+                    //premultiplied_alpha: page.pma(),
+                    premultiplied_alpha: false, // TODO
                     min_filter: page.min_filter(),
                     mag_filter: page.mag_filter(),
                     u_wrap: page.u_wrap(),

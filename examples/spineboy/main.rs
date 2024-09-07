@@ -20,7 +20,7 @@ fn setup(
 
     let skeleton = SkeletonData::new_from_binary(
         asset_server.load("spineboy/export/spineboy-pro.skel"),
-        asset_server.load("spineboy/export/spineboy-pma.atlas"),
+        asset_server.load("spineboy/export/spineboy.atlas"),
     );
     let skeleton_handle = skeletons.add(skeleton);
     player_spawn_events.send(PlayerSpawnEvent {

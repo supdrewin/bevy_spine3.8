@@ -157,7 +157,7 @@ impl Plugin for SpinePlugin {
                     .in_set(SpineSet::OnUpdateMesh)
                     .after(SpineSystem::UpdateAnimation)
                     .after(SpineSet::OnEvent),
-                apply_deferred
+                ApplyDeferred
                     .in_set(SpineSystem::SpawnFlush)
                     .after(SpineSystem::Spawn)
                     .before(SpineSystem::Ready),
@@ -697,7 +697,7 @@ fn spine_spawn(
                         });
                     controller.skeleton.set_to_setup_pose();
                     let mut bones = HashMap::new();
-                    if let Some(mut entity_commands) = commands.get_entity(spine_entity) {
+                    if let Ok(mut entity_commands) = commands.get_entity(spine_entity) {
                         entity_commands
                             .with_children(|parent| {
                                 // TODO: currently, a mesh is created for each slot, however when we use the
@@ -770,7 +770,7 @@ fn spine_spawn(
 fn spawn_bones(
     spine_entity: Entity,
     bone_parent: Option<SpineBoneParent>,
-    parent: &mut ChildBuilder,
+    parent: &mut ChildSpawnerCommands,
     skeleton: &Skeleton,
     bone: BoneHandle,
     bones: &mut HashMap<String, Entity>,
@@ -803,7 +803,7 @@ fn spawn_bones(
                     spawn_bones(
                         spine_entity,
                         Some(SpineBoneParent {
-                            entity: parent.parent_entity(),
+                            entity: parent.target_entity(),
                             handle: bone.handle(),
                         }),
                         parent,
@@ -823,7 +823,7 @@ fn spine_ready(
     mut ready_writer: EventWriter<SpineReadyEvent>,
 ) {
     for event in take(&mut ready_events.0).into_iter() {
-        ready_writer.send(event);
+        ready_writer.write(event);
     }
 }
 
@@ -839,7 +839,7 @@ fn spine_update_animation(
     {
         let mut events = spine_event_queue.0.lock().unwrap();
         while let Some(event) = events.pop_front() {
-            spine_events.send(event);
+            spine_events.write(event);
         }
     }
 }
@@ -861,11 +861,11 @@ fn spine_update_meshes(
         Option<&Mesh3d>,
     )>,
     mut commands: Commands,
-    meshes_query: Query<(&Parent, &Children), With<SpineMeshes>>,
+    meshes_query: Query<(&ChildOf, &Children), With<SpineMeshes>>,
     asset_server: Res<AssetServer>,
 ) {
     for (meshes_parent, meshes_children) in meshes_query.iter() {
-        let Ok((mut spine, spine_mesh_type)) = spine_query.get_mut(meshes_parent.get()) else {
+        let Ok((mut spine, spine_mesh_type)) = spine_query.get_mut(meshes_parent.parent()) else {
             continue;
         };
         let SpineSettings {
@@ -887,19 +887,19 @@ fn spine_update_meshes(
                 mut spine_mesh_transform,
                 spine_2d_mesh,
                 spine_3d_mesh,
-            )) = mesh_query.get_mut(*child)
+            )) = mesh_query.get_mut(child)
             {
                 macro_rules! apply_mesh {
                     ($mesh:ident, $condition:expr, $attach:expr, $deattach:ty) => {
                         if $condition {
                             if !$mesh.is_some() {
-                                if let Some(mut entity) = commands.get_entity(spine_mesh_entity) {
+                                if let Ok(mut entity) = commands.get_entity(spine_mesh_entity) {
                                     entity.insert($attach);
                                 }
                             }
                         } else {
                             if $mesh.is_some() {
-                                if let Some(mut entity) = commands.get_entity(spine_mesh_entity) {
+                                if let Ok(mut entity) = commands.get_entity(spine_mesh_entity) {
                                     entity.remove::<$deattach>();
                                 }
                             }
@@ -1074,7 +1074,7 @@ fn adjust_spine_textures(
                     AtlasFilter::Nearest => ImageFilterMode::Nearest,
                     AtlasFilter::Linear => ImageFilterMode::Linear,
                     _ => {
-                        warn!("Unsupported Spine filter: {:?}", filter);
+                        // warn!("Unsupported Spine filter: {:?}", filter);
                         ImageFilterMode::Nearest
                     }
                 }
@@ -1085,7 +1085,7 @@ fn adjust_spine_textures(
                     AtlasWrap::MirroredRepeat => ImageAddressMode::MirrorRepeat,
                     AtlasWrap::Repeat => ImageAddressMode::Repeat,
                     _ => {
-                        warn!("Unsupported Spine wrap mode: {:?}", wrap);
+                        // warn!("Unsupported Spine wrap mode: {:?}", wrap);
                         ImageAddressMode::ClampToEdge
                     }
                 }
@@ -1100,32 +1100,34 @@ fn adjust_spine_textures(
             // The RGB components exported from Spine were premultiplied in nonlinear space, but need to be
             // multiplied in linear space to render properly in Bevy.
             if handle_config.premultiplied_alpha {
-                for i in 0..(image.data.len() / 4) {
-                    let mut rgba = Srgba::rgba_u8(
-                        image.data[i * 4],
-                        image.data[i * 4 + 1],
-                        image.data[i * 4 + 2],
-                        image.data[i * 4 + 3],
-                    );
-                    if rgba.alpha != 0. {
-                        rgba = Srgba::new(
-                            rgba.red / rgba.alpha,
-                            rgba.green / rgba.alpha,
-                            rgba.blue / rgba.alpha,
-                            rgba.alpha,
+                if let Some(data) = &mut image.data {
+                    for i in 0..(data.len() / 4) {
+                        let mut rgba = Srgba::rgba_u8(
+                            data[i * 4],
+                            data[i * 4 + 1],
+                            data[i * 4 + 2],
+                            data[i * 4 + 3],
                         );
-                    } else {
-                        rgba = Srgba::new(0., 0., 0., 0.);
+                        if rgba.alpha != 0. {
+                            rgba = Srgba::new(
+                                rgba.red / rgba.alpha,
+                                rgba.green / rgba.alpha,
+                                rgba.blue / rgba.alpha,
+                                rgba.alpha,
+                            );
+                        } else {
+                            rgba = Srgba::new(0., 0., 0., 0.);
+                        }
+                        let mut linear_rgba = LinearRgba::from(rgba);
+                        linear_rgba.red *= linear_rgba.alpha;
+                        linear_rgba.green *= linear_rgba.alpha;
+                        linear_rgba.blue *= linear_rgba.alpha;
+                        rgba = Srgba::from(linear_rgba);
+                        data[i * 4] = (rgba.red * 255.) as u8;
+                        data[i * 4 + 1] = (rgba.green * 255.) as u8;
+                        data[i * 4 + 2] = (rgba.blue * 255.) as u8;
+                        data[i * 4 + 3] = (rgba.alpha * 255.) as u8;
                     }
-                    let mut linear_rgba = LinearRgba::from(rgba);
-                    linear_rgba.red *= linear_rgba.alpha;
-                    linear_rgba.green *= linear_rgba.alpha;
-                    linear_rgba.blue *= linear_rgba.alpha;
-                    rgba = Srgba::from(linear_rgba);
-                    image.data[i * 4] = (rgba.red * 255.) as u8;
-                    image.data[i * 4 + 1] = (rgba.green * 255.) as u8;
-                    image.data[i * 4 + 2] = (rgba.blue * 255.) as u8;
-                    image.data[i * 4 + 3] = (rgba.alpha * 255.) as u8;
                 }
             }
             removed_handles.push(handle_index);

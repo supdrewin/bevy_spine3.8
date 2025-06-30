@@ -5,7 +5,7 @@
 use std::marker::PhantomData;
 
 use bevy::{
-    asset::Asset,
+    asset::{weak_handle, Asset},
     ecs::system::{StaticSystemParam, SystemParam},
     prelude::*,
     reflect::TypePath,
@@ -105,13 +105,13 @@ fn update_materials<T: SpineMaterial>(
                 *material = new_material;
             } else {
                 materials.remove(handle.clone());
-                if let Some(mut entity_commands) = commands.get_entity(mesh_entity) {
+                if let Ok(mut entity_commands) = commands.get_entity(mesh_entity) {
                     entity_commands.remove::<T::MeshMaterial>();
                 }
             }
         } else if let Some(material) = T::update(None, spine_mesh.spine_entity, data, &params) {
             let handle = materials.add(material);
-            if let Some(mut entity_commands) = commands.get_entity(mesh_entity) {
+            if let Ok(mut entity_commands) = commands.get_entity(mesh_entity) {
                 entity_commands
                     .insert(<T::MeshMaterial as From<Handle<T::Material>>>::from(handle));
             }
@@ -126,7 +126,7 @@ pub const DARK_COLOR_ATTRIBUTE: MeshVertexAttribute = MeshVertexAttribute::new(
     VertexFormat::Float32x4,
 );
 
-pub const SHADER_HANDLE: Handle<Shader> = Handle::<Shader>::weak_from_u128(10655547040990968849);
+pub const SHADER_HANDLE: Handle<Shader> = weak_handle!("1347c9b7-c46a-48e7-b7b8-023a354b7cac");
 
 /// A [`SystemParam`] to query [`SpineSettings`].
 ///

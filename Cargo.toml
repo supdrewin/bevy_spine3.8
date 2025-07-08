@@ -19,8 +19,8 @@ default-features = false
 features = ["bevy_render", "bevy_asset", "bevy_sprite"]
 
 [dependencies.rusty_spine]
-git = "https://github.com/jabuwu/rusty_spine3.8"
-rev = "4ff8b7280aeb7367f235752c30dc85184c01452a"
+git = "https://github.com/supdrewin/rusty_spine"
+branch = "3.8"
 
 [dev-dependencies]
 lerp = "0.5"

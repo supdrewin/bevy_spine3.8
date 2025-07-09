@@ -25,17 +25,17 @@ use materials::{
     SpineScreenPmaMaterial,
 };
 use rusty_spine::{
+    AnimationEvent, Skeleton,
     atlas::{AtlasFilter, AtlasWrap},
     controller::{SkeletonCombinedRenderable, SkeletonRenderable},
-    AnimationEvent, Skeleton,
 };
 use textures::SpineTextureConfig;
 
 use crate::{
     assets::{AtlasLoader, SkeletonJsonLoader},
-    materials::{SpineMaterialPlugin, DARK_COLOR_ATTRIBUTE, SHADER_HANDLE},
+    materials::{DARK_COLOR_ATTRIBUTE, SHADER_HANDLE, SpineMaterialPlugin},
     rusty_spine::{
-        controller::SkeletonControllerSettings, draw::CullDirection, AnimationStateData, BoneHandle,
+        AnimationStateData, BoneHandle, controller::SkeletonControllerSettings, draw::CullDirection,
     },
     textures::{SpineTexture, SpineTextureCreateEvent, SpineTextureDisposeEvent, SpineTextures},
 };
@@ -1145,6 +1145,9 @@ mod handle;
 
 pub mod materials;
 pub mod textures;
+
+#[cfg(test)]
+mod test;
 
 #[doc(hidden)]
 pub mod prelude {

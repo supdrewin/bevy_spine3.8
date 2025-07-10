@@ -20,7 +20,7 @@ features = ["bevy_render", "bevy_asset", "bevy_sprite"]
 
 [dependencies.rusty_spine]
 git = "https://github.com/supdrewin/rusty_spine"
-branch = "3.8"
+branch = "3.7"
 
 [dev-dependencies]
 lerp = "0.5"

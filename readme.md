@@ -1,6 +1,6 @@
 # bevy_spine
 
-This is a fork of [bevy_spine](https://github.com/jabuwu/bevy_spine) that supports [Spine 3.8](http://esotericsoftware.com/).
+This is a fork of [bevy_spine](https://github.com/jabuwu/bevy_spine) that supports [Spine 3.7](http://esotericsoftware.com/).
 
 ## License
 

@@ -5,7 +5,7 @@
 use std::marker::PhantomData;
 
 use bevy::{
-    asset::{weak_handle, Asset},
+    asset::{Asset, weak_handle},
     ecs::system::{StaticSystemParam, SystemParam},
     prelude::*,
     reflect::TypePath,
@@ -126,7 +126,7 @@ pub const DARK_COLOR_ATTRIBUTE: MeshVertexAttribute = MeshVertexAttribute::new(
     VertexFormat::Float32x4,
 );
 
-pub const SHADER_HANDLE: Handle<Shader> = weak_handle!("1347c9b7-c46a-48e7-b7b8-023a354b7cac");
+pub const SHADER_HANDLE: Handle<Shader> = weak_handle!("38b42512-1b99-43ed-ad09-6f36bb4ca3f9");
 
 /// A [`SystemParam`] to query [`SpineSettings`].
 ///

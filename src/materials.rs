@@ -126,7 +126,7 @@ pub const DARK_COLOR_ATTRIBUTE: MeshVertexAttribute = MeshVertexAttribute::new(
     VertexFormat::Float32x4,
 );
 
-pub const SHADER_HANDLE: Handle<Shader> = weak_handle!("38b42512-1b99-43ed-ad09-6f36bb4ca3f9");
+pub const SHADER_HANDLE: Handle<Shader> = weak_handle!("3771cc90-9573-4de5-b697-15505bd06a61");
 
 /// A [`SystemParam`] to query [`SpineSettings`].
 ///

@@ -445,7 +445,7 @@ pub struct SpineBundle {
 ///
 /// For convenience, systems receiving this event can be added to the [`SpineSet::OnReady`] set to
 /// receive this after events are sent, but before the first [`SkeletonController`] update.
-#[derive(Debug, Clone, Event)]
+#[derive(Debug, Clone, BufferedEvent)]
 pub struct SpineReadyEvent {
     /// The entity containing the [`Spine`] component.
     pub entity: Entity,
@@ -474,7 +474,7 @@ pub struct SpineReadyEvent {
 ///     }
 /// }
 /// ```
-#[derive(Debug, Clone, Event)]
+#[derive(Debug, Clone, BufferedEvent)]
 pub enum SpineEvent {
     Start {
         entity: Entity,

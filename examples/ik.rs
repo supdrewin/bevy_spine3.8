@@ -56,7 +56,7 @@ fn on_spawn(
                 animation_state,
                 ..
             }) = spine.as_mut();
-            skeleton.set_scale(Vec2::splat(1.));
+            skeleton.set_scale(Vec2::splat(1.).to_array());
             let _ = animation_state.set_animation_by_name(0, "run", true);
             let _ = animation_state.set_animation_by_name(1, "aim", true);
             let _ = animation_state.set_animation_by_name(2, "shoot", true);
@@ -94,7 +94,7 @@ fn ik(
         let parent_global_transform = global_transform_query
             .get(crosshair_bone.parent.as_ref().unwrap().entity)
             .unwrap();
-        crosshair_transform.translation = (parent_global_transform.compute_matrix().inverse()
+        crosshair_transform.translation = (parent_global_transform.to_matrix().inverse()
             * Vec4::new(cursor_position.x, cursor_position.y, 0., 1.))
         .truncate();
     }

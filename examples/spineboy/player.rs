@@ -51,7 +51,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Event)]
+#[derive(BufferedEvent)]
 pub struct PlayerSpawnEvent {
     pub skeleton: Handle<SkeletonData>,
 }
@@ -194,7 +194,7 @@ fn player_aim(
                 let matrix = if let Ok(parent_transform) =
                     global_transform_query.get(crosshair_parent.parent())
                 {
-                    parent_transform.compute_matrix().inverse()
+                    parent_transform.to_matrix().inverse()
                 } else {
                     Mat4::IDENTITY
                 };

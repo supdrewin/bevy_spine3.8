@@ -1,7 +1,7 @@
 use std::{path::Path, sync::Arc};
 
 use bevy::{
-    asset::{io::Reader, AssetLoader, LoadContext},
+    asset::{AssetLoader, LoadContext, io::Reader},
     prelude::*,
     reflect::TypePath,
 };
@@ -133,7 +133,6 @@ pub struct SkeletonData {
     pub atlas_handle: Handle<Atlas>,
     pub kind: SkeletonDataKind,
     pub status: SkeletonDataStatus,
-    pub premultiplied_alpha: bool,
 }
 
 #[derive(Debug)]
@@ -183,7 +182,6 @@ impl SkeletonData {
             atlas_handle: atlas,
             kind: SkeletonDataKind::JsonFile(json),
             status: SkeletonDataStatus::Loading,
-            premultiplied_alpha: false,
         }
     }
 
@@ -220,7 +218,6 @@ impl SkeletonData {
             atlas_handle: atlas,
             kind: SkeletonDataKind::BinaryFile(binary),
             status: SkeletonDataStatus::Loading,
-            premultiplied_alpha: false,
         }
     }
 

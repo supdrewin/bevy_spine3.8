@@ -324,6 +324,8 @@ pub struct SpineSettings {
     pub mesh_type: SpineMeshType,
     /// The drawer this Spine should use to create its meshes.
     pub drawer: SpineDrawer,
+    /// We should config it ourselves since Spine 3.8 atlas don't have `pma` field.
+    pub premultiplied_alpha: bool,
 }
 
 /// Mesh types to use in [`SpineSettings`].
@@ -358,6 +360,7 @@ impl Default for SpineSettings {
             default_materials: true,
             mesh_type: SpineMeshType::Mesh2D,
             drawer: SpineDrawer::Combined,
+            premultiplied_alpha: false,
         }
     }
 }
@@ -536,7 +539,6 @@ fn spine_load(
                 atlas_handle,
                 kind,
                 status,
-                premultiplied_alpha: _,
             } = skeleton_data_asset;
             if matches!(status, SkeletonDataStatus::Loading) {
                 let atlas = if let Some(atlas) = atlases.get(atlas_handle) {
@@ -544,10 +546,6 @@ fn spine_load(
                 } else {
                     continue;
                 };
-                // TODO
-                /*if let Some(page) = atlas.atlas.pages().next() {
-                    *premultiplied_alpha = page.pma();
-                }*/
                 match kind {
                     SkeletonDataKind::JsonFile(json_handle) => {
                         let json = if let Some(json) = jsons.get(json_handle) {
@@ -631,8 +629,7 @@ fn spine_spawn(
                     )
                     .with_settings(
                         SkeletonControllerSettings::new()
-                            .with_cull_direction(CullDirection::CounterClockwise)
-                            .with_premultiplied_alpha(skeleton_data_asset.premultiplied_alpha),
+                            .with_cull_direction(CullDirection::CounterClockwise),
                     );
                     let events = spine_event_queue.0.clone();
                     controller
@@ -869,7 +866,10 @@ fn spine_update_meshes(
             continue;
         };
         let SpineSettings {
-            mesh_type, drawer, ..
+            mesh_type,
+            drawer,
+            premultiplied_alpha,
+            ..
         } = spine_mesh_type.cloned().unwrap_or(SpineSettings::default());
         let mut renderables = match drawer {
             SpineDrawer::Combined => {
@@ -932,7 +932,6 @@ fn spine_update_meshes(
                         colors,
                         dark_colors,
                         blend_mode,
-                        premultiplied_alpha,
                     ) = match &mut renderables {
                         SkeletonRenderableKind::Simple(vec) => {
                             let Some(renderable) = vec.get_mut(renderable_index) else {
@@ -965,7 +964,6 @@ fn spine_update_meshes(
                                 colors,
                                 dark_colors,
                                 renderable.blend_mode,
-                                renderable.premultiplied_alpha,
                             )
                         }
                         SkeletonRenderableKind::Combined(vec) => {
@@ -981,7 +979,6 @@ fn spine_update_meshes(
                                 take(&mut renderable.colors),
                                 take(&mut renderable.dark_colors),
                                 renderable.blend_mode,
-                                renderable.premultiplied_alpha,
                             )
                         }
                     };

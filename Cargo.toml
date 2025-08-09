@@ -10,7 +10,7 @@ license-file = "LICENSE"
 exclude = ["assets/*"]
 
 [dependencies]
-glam = { version = "0.29", features = ["mint"] }
+glam = { version = "0.30", features = ["mint"] }
 thiserror = "2"
 
 [dependencies.bevy]
